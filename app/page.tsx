@@ -1,7 +1,10 @@
 import Link from "next/link";
-import { CATEGORIES, homeFeatured } from "@/lib/products";
+import { CATEGORIES } from "@/lib/products";
+import { getProducts } from "@/lib/db/queries";
 import ProductGrid from "@/components/ProductGrid";
 import { ProductTile } from "@/components/ProductBits";
+
+export const dynamic = "force-dynamic";
 
 function GlowIcon({ path, className = "" }: { path: string; className?: string }) {
   return (
@@ -39,7 +42,11 @@ const TRUST_ITEMS = [
   },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const allProducts = await getProducts();
+  const homeFeatured = allProducts
+    .filter((p) => p.badge === "Bestseller" || p.badge === "New")
+    .slice(0, 4);
   const [heroA, heroB] = homeFeatured;
 
   return (

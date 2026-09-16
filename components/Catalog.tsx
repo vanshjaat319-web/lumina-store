@@ -2,10 +2,10 @@
 
 import { useMemo, useState } from "react";
 import {
-  products,
   CATEGORIES,
   isCategory,
   type Category,
+  type Product,
 } from "@/lib/products";
 import ProductGrid from "@/components/ProductGrid";
 
@@ -19,8 +19,10 @@ const SORT_OPTIONS: { value: Sort; label: string }[] = [
 ];
 
 export default function Catalog({
+  products,
   initialCategory,
 }: {
+  products: Product[];
   initialCategory?: string;
 }) {
   const [query, setQuery] = useState("");
@@ -55,7 +57,7 @@ export default function Catalog({
         break;
     }
     return list;
-  }, [query, category, sort]);
+  }, [query, category, sort, products]);
 
   return (
     <div>

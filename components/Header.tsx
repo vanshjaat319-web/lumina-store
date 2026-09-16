@@ -2,13 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { CATEGORIES } from "@/lib/products";
 
-export default function Header() {
+export default function Header({ userName }: { userName?: string | null }) {
   const { count, loaded } = useCart();
   const pathname = usePathname();
+  const router = useRouter();
   const [shopOpen, setShopOpen] = useState(false);
   const dropdownRef = useRef<HTMLLIElement>(null);
 
@@ -123,32 +124,69 @@ export default function Header() {
           </ul>
         </nav>
 
-        {/* Cart */}
-        <Link
-          href="/cart"
-          className="relative flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg border border-hairline bg-white px-3.5 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-300 hover:text-zinc-900"
-          aria-label={`Cart, ${count} item${count === 1 ? "" : "s"}`}
-        >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.75"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="h-4.5 w-4.5"
-            aria-hidden="true"
-          >
-            <path d="M6 7h12l1.2 12.2a1 1 0 0 1-1 1.1H5.8a1 1 0 0 1-1-1.1L6 7Z" />
-            <path d="M9 10V6a3 3 0 0 1 6 0v4" />
-          </svg>
-          <span className="hidden sm:block">Cart</span>
-          {loaded && count > 0 && (
-            <span className="absolute -right-1.5 -top-1.5 grid min-w-5 place-items-center rounded-full bg-indigo-700 px-1.5 py-0.5 text-[11px] font-semibold leading-none text-white ring-2 ring-white">
-              {count}
-            </span>
+        {/* Auth + Cart */}
+        <div className="flex items-center gap-2">
+          {userName ? (
+            <div className="flex items-center gap-1">
+              <Link
+                href="/account"
+                className="flex h-10 items-center gap-2 rounded-lg border border-hairline bg-white px-3.5 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-300 hover:text-zinc-900"
+                aria-label="Your account and orders"
+              >
+                <span
+                  className="grid h-5 w-5 place-items-center rounded-full bg-indigo-700 text-[11px] font-semibold text-white"
+                  aria-hidden="true"
+                >
+                  {(userName.trim()[0] ?? "U").toUpperCase()}
+                </span>
+                <span className="hidden sm:block">Account</span>
+              </Link>
+              <button
+                type="button"
+                onClick={async () => {
+                  await fetch("/api/auth/logout", { method: "POST" });
+                  router.refresh();
+                }}
+                className="h-10 rounded-lg px-2 text-sm text-zinc-400 transition-colors hover:text-zinc-700"
+              >
+                Sign out
+              </button>
+            </div>
+          ) : (
+            <Link
+              href="/login"
+              className="h-10 rounded-lg px-2 text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900"
+            >
+              Sign in
+            </Link>
           )}
-        </Link>
+
+          <Link
+            href="/cart"
+            className="relative flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg border border-hairline bg-white px-3.5 text-sm font-medium text-zinc-700 transition-colors hover:border-zinc-300 hover:text-zinc-900"
+            aria-label={`Cart, ${count} item${count === 1 ? "" : "s"}`}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.75"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-4.5 w-4.5"
+              aria-hidden="true"
+            >
+              <path d="M6 7h12l1.2 12.2a1 1 0 0 1-1 1.1H5.8a1 1 0 0 1-1-1.1L6 7Z" />
+              <path d="M9 10V6a3 3 0 0 1 6 0v4" />
+            </svg>
+            <span className="hidden sm:block">Cart</span>
+            {loaded && count > 0 && (
+              <span className="absolute -right-1.5 -top-1.5 grid min-w-5 place-items-center rounded-full bg-indigo-700 px-1.5 py-0.5 text-[11px] font-semibold leading-none text-white ring-2 ring-white">
+                {count}
+              </span>
+            )}
+          </Link>
+        </div>
       </div>
     </header>
   );

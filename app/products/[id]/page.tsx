@@ -2,21 +2,15 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import {
-  products,
-  getProduct,
   getCategoryLabel,
-  relatedProducts,
   discountFor,
 } from "@/lib/products";
+import { getProduct, getProducts } from "@/lib/db/queries";
 import { Badge, Price, ProductTile, Stars } from "@/components/ProductBits";
 import PurchaseBox from "@/components/PurchaseBox";
 import ProductGrid from "@/components/ProductGrid";
 
-export const dynamicParams = false;
-
-export function generateStaticParams() {
-  return products.map((product) => ({ id: product.id }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
@@ -24,7 +18,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const product = getProduct(id);
+  const product = await getProduct(id);
   return {
     title: product ? `${product.name} — Lumina` : "Product — Lumina",
     description: product?.shortDescription,
@@ -54,10 +48,14 @@ export default async function ProductPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const product = getProduct(id);
+  const product = await getProduct(id);
   if (!product) notFound();
 
-  const related = relatedProducts(product.id);
+  // Get related products from DB: same category, excluding current
+  const allProducts = await getProducts();
+  const related = allProducts
+    .filter((p) => p.category === product.category && p.id !== product.id)
+    .slice(0, 4);
   const discount = discountFor(product);
 
   return (

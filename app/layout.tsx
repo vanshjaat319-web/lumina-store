@@ -6,6 +6,7 @@ import AnnouncementBar from "@/components/AnnouncementBar";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FadeIn from "@/components/FadeIn";
+import { getCurrentUser } from "@/lib/auth";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,9 +24,10 @@ export const metadata: Metadata = {
     "Curated audio, home, desk, and wearables — designed to last, shipped free over $50, with a 30-day money-back guarantee.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const user = await getCurrentUser();
   return (
     <html
       lang="en"
@@ -34,7 +36,7 @@ export default function RootLayout({
       <body className="flex min-h-full flex-col font-sans">
         <CartProvider>
           <AnnouncementBar />
-          <Header />
+          <Header userName={user?.name ?? null} />
           <main className="flex-1">
             <FadeIn>{children}</FadeIn>
           </main>

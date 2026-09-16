@@ -1,17 +1,20 @@
 import type { Metadata } from "next";
 import Catalog from "@/components/Catalog";
+import { getProducts } from "@/lib/db/queries";
 
 export const metadata: Metadata = {
   title: "Shop — Lumina",
-  description: "Browse the full Lumina catalog. Fictional demo products only.",
+  description: "Browse the full Lumina catalog — audio, home, desk, wearables, and accessories.",
 };
+
+export const dynamic = "force-dynamic";
 
 export default async function ProductsPage({
   searchParams,
 }: {
   searchParams: Promise<{ category?: string }>;
 }) {
-  const { category } = await searchParams;
+  const [{ category }, products] = await Promise.all([searchParams, getProducts()]);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
@@ -21,7 +24,7 @@ export default async function ProductsPage({
           Every product we carry. Search, filter by category, and sort to find your next favourite.
         </p>
       </header>
-      <Catalog initialCategory={category} />
+      <Catalog products={products} initialCategory={category} />
     </div>
   );
 }
